@@ -105,7 +105,7 @@ class RagPipeline:
             ch = chunk_text(txt)
             for c in ch:
                 texts.append(c)
-                metas.append({"source": src})
+                metas.append({"source": src, "text": c})
 
         if not texts:
             return 0
@@ -140,19 +140,27 @@ class RagPipeline:
             if idx < 0 or idx >= len(self.meta):
                 continue
             meta = self.meta[idx]
-            out.append({"source": meta.get("source", "unknown"), "text": ""})
+            out.append({"source": meta.get("source", "unknown"), "text": meta.get("text", "")})
         return out
 
     def format_context(self, docs: List[Dict[str, str]]) -> str:
         if not docs:
             return ""
-        uniq = []
-        seen = set()
+        # Build a concise context with top passages and their sources
+        context_parts: List[str] = []
+        total_chars = 0
+        max_chars = 1800  # keep prompt size reasonable
         for d in docs:
-            s = d.get("source", "")
-            if s and s not in seen:
-                uniq.append(s)
-                seen.add(s)
-        return "\n".join(f"[source] {s}" for s in uniq)
+            source = d.get("source", "unknown")
+            text = (d.get("text", "") or "").strip()
+            if not text:
+                continue
+            snippet = text[:600]
+            block = f"[source] {source}\n{snippet}"
+            if total_chars + len(block) > max_chars:
+                break
+            context_parts.append(block)
+            total_chars += len(block)
+        return "\n\n".join(context_parts)
 
 

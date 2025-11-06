@@ -1,0 +1,211 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\begin{document}
+
+\title{Adaptive Study Companion: Distress Mapping with LLM Guidance}
+
+\author{\IEEEauthorblockN{\footnotesize\textit{Anirudh R.}}
+\IEEEauthorblockA{\footnotesize School of Computer Science and Engineering\\
+Vellore Institute of Technology, Chennai, India}
+\and
+\IEEEauthorblockN{\footnotesize\textit{Himani S Kumar}}
+\IEEEauthorblockA{\footnotesize School of Computer Science and Engineering\\
+Vellore Institute of Technology, Chennai, India}
+\and
+\IEEEauthorblockN{\footnotesize\textit{Raazi Faisal Mohiddin}}
+\IEEEauthorblockA{\footnotesize School of Computer Science and Engineering\\
+Vellore Institute of Technology, Chennai, India}}
+
+\maketitle
+
+\begin{abstract}
+We present the Adaptive Study Companion, a system that detects student distress in real time from multimodal wearable signals and delivers personalized guidance using a Large Language Model (LLM) with Retrieval-Augmented Generation (RAG). Physiological and motion data (e.g., ECG-derived HRV, EDA, and accelerometer magnitude) are processed on-device for low-latency stress inference, while a backend LLM reformats retrieved course materials into simplified, stress-aware study units and relaxation prompts. Using the WESAD dataset for modeling and evaluation, we explore a lightweight 1D-CNN/LSTM pipeline, baseline-normalization, and sliding-window training. Results indicate strong feasibility for tri-class classification (stress, amusement, meditation) with efficient inference suitable for edge deployment. We discuss architecture, workflow, implementation details, evaluation metrics, limitations, and future enhancements toward safe, adaptive learning support.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Wearable computing, stress detection, multimodal signals, HRV, EDA, 1D-CNN, LSTM, RAG, LLM, adaptive learning.
+\end{IEEEkeywords}
+
+\section{Introduction}
+\subsection{Background and Motivation}
+Prolonged stress negatively impacts well-being and academic performance. Traditional self-report methods are subjective and sparse, motivating continuous and objective measurement using wearable sensors. Advances in affective computing and LLMs enable closed-loop systems that detect distress and adapt learning content in real time.
+
+\subsection{Problem Definition}
+Design a privacy-preserving system that detects student distress from wearable signals with low latency and uses LLM-driven RAG to deliver stress-adjusted study guidance, pacing, and relaxation prompts.
+
+\subsection{Scope of the Project}
+We target tri-class affective states present in WESAD and demonstrate an end-to-end pipeline spanning data acquisition, on-device inference, backend RAG, and a web UI for adaptive learning support.
+
+\section{Objectives}
+\begin{itemize}
+    \item Detect stress in real time from multimodal physiological and motion data.
+    \item Run efficient on-device inference with a lightweight deep model.
+    \item Personalize content via LLM-driven reasoning and RAG.
+    \item Provide actionable feedback (relaxation, pacing, scheduling).
+    \item Close the loop between physiological state and learning outcomes.
+\end{itemize}
+
+\section{Literature Review}
+The development of intelligent adaptive study systems is grounded in two converging lines of work: (i) multimodal distress/stress detection from physiological and behavioral signals, and (ii) the use of Large Language Models (LLMs)---increasingly with Retrieval-Augmented Generation (RAG)---to deliver context-aware, personalized guidance.
+
+\subsection{Multimodal Stress and Affect Sensing}
+Hosseini et al. (2023) propose a multimodal learning approach that fuses facial landmarks with biometric signals (e.g., HR, EDA) for stress detection \cite{b2}. Their early-fusion strategy with a 1D-CNN achieved \textasciitilde98.38\% accuracy, outperforming unimodal and late-fusion baselines. This underscores the value of complementary modalities and motivates our emphasis on combining ECG-derived HRV, EDA phasic features, and ACC magnitude within a unified temporal model.
+
+Choksi et al. (2024) introduce SensEmo, a smartwatch-based system for affective learning that recognizes student motivation and concentration in real time from HR and GSR \cite{b4}. Using a personalized valence/arousal model and a reinforcement-learning controller, SensEmo reached \textasciitilde88.9\% recognition accuracy and improved online learning outcomes (\textasciitilde40\% higher quiz scores). This highlights personalization and closed-loop adaptation, which we adopt via a personalization engine and LLM-driven content tuning.
+
+Xu et al. (2024) present an adaptive framework for personalized stress detection from wearable signals (PPG, EDA), addressing domain shift across users \cite{b3}. They train a generalized model (1D-CNN backbone), adapt it with unsupervised DANN using user-specific unlabeled data, and fine-tune with a small labeled set. This staged approach motivates future extensions of our pipeline for user-level adaptation without extensive annotation.
+
+\subsection{LLMs, RAG, and Safety for Emotional Support}
+Yu et al. (2025) survey the convergence of multimodal sensing with LLMs for automated emotional regulation \cite{b5}. They detail LLMs' strengths in coherent, context-aware generation and RAG-based grounding, while emphasizing challenges: absence of true empathy, hallucinations, bias, and underdeveloped crisis detection. We address these via retrieval grounding, safety classifiers/filters, strict formatting, and a graceful fallback to an on-device model when cloud support is unavailable.
+
+\subsection{Implications for This Work}
+Taken together, prior work points to three design principles we adopt: (1) multimodal fusion with robust temporal modeling, (2) user-aware adaptation for reliability across diverse contexts, and (3) LLM+RAG pipelines with safety, traceability, and clear scope boundaries. Our contribution is to integrate these into a single, edge-aware pipeline for adaptive study guidance driven by real-time stress state.
+
+\section{Proposed System}
+\subsection{Architecture Overview}
+The architecture follows a hybrid on-device and cloud-integrated pipeline: (1) \textbf{Data Acquisition} via Apple Watch capturing HR, HRV, BP and ACC; (2) \textbf{On-Device ML Inference} on iPhone with a dual 1D-CNN temporal model---CNN-1 for cardiovascular features (HR, HRV, BP) and CNN-2 for motion features (ACC), fused to predict a real-time stress index (low/moderate/high) aligned to our tri-class targets; (3) \textbf{Cloud Processing \\& RAG} where the inferred state and recent study context are sent to a backend that retrieves relevant course materials and reformats them; and (4) \textbf{Adaptive Frontend \\& Feedback} presenting stress-adjusted study units, relaxation prompts, pacing cues, and capturing user feedback for continual tuning.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=0.95\linewidth]{architecture.png}}
+\caption{System architecture.}
+\label{fig:arch}
+\end{figure}
+
+\subsection{System Workflow}
+Sensors stream to the phone, where signals are resampled (700~Hz to 100~Hz), denoised, segmented into 30~s windows (15~s stride), and transformed into time-step features: HRV surrogates from ECG, phasic EDA metrics, and ACC magnitude. A compact 1D-CNN+LSTM performs tri-class classification (stress, amusement, meditation). The predicted state plus recent study context form a query to the retriever; the LLM converts retrieved passages into stress-adjusted study units and concise relaxation guidance, with formatting and safety constraints. The frontend renders guidance and feeds interaction telemetry for continual tuning.
+
+\subsection{LLM Integration and Modes}
+We use two LLM configurations: a local, low-latency model (DeepSeek Distil with LLaMA 8B) for on-device guidance when bandwidth or privacy constraints dominate, and a cloud model (Gemini~2.5~Pro, \(\sim\)200k context) for richer synthesis using larger retrieved contexts and session histories. Prompts encode stress state, learning goals, and retrieval snippets; responses are checked for safety and formatting before display.
+
+\subsection{Personalization and Safety}
+The system supports gradual personalization via calibration windows and, in future, domain-adaptive training (e.g., DANN) as per \cite{b3}. Safety mechanisms include high-risk intent detection, content constraints, retrieval grounding, and a strict fallback path that avoids speculative advice.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=0.95\linewidth]{workflow.png}}
+\caption{Workflow from sensing to adaptive guidance.}
+\label{fig:flow}
+\end{figure}
+
+\section{Implementation Details}
+\subsection{Tools and Technologies Used}
+Wearables (Apple Watch/HealthKit), iOS app for on-device inference (TensorFlow Lite/Core ML), backend (FastAPI/Flask), vector store (FAISS/Chroma), LLM engines: \textit{local} DeepSeek Distil with LLaMA 8B for on-device/edge guidance and \textit{cloud} Gemini~2.5~Pro (\(\sim\)200k context window) for high-context reasoning, frontend (React/Next.js), and PostgreSQL.
+
+\subsection{Modules Description}
+\begin{enumerate}
+    \item \textbf{Sensor \\& Data Acquisition}: Read HR, HRV, BP, and ACC through Apple HealthKit; sync watch and phone.
+    \item \textbf{Stress Detection (On-Device)}: Dual 1D-CNN streams (cardio and motion) with late fusion to produce a stress index with continuous calibration over time.
+    \item \textbf{Backend Communication}: Secure REST transmission of anonymized stress-level summaries and study context to the web service.
+    \item \textbf{RAG + LLM}: Retrieve relevant academic content (FAISS/Chroma) and generate stress-adjusted study units and relaxation guidance using either local DeepSeek Distil (LLaMA 8B) or cloud Gemini~2.5~Pro (\(\sim\)200k context), depending on connectivity/privacy constraints.
+    \item \textbf{Adaptive Study Frontend}: Display study units, visual stress indicators, pacing/break recommendations, and track progress.
+    \item \textbf{Personalization Engine}: Continuously tune retrieval parameters and prompting strategies using historical stress-response patterns; future support for domain-adaptive training (e.g., DANN).
+\end{enumerate}
+
+\subsection{Dataset and Preprocessing}
+We use the WESAD dataset \cite{b6}, selecting chest signals (ECG, EDA, ACC) for efficiency. Signals are resampled from 700~Hz to 100~Hz for tractable edge deployment. Basic denoising and normalization are applied. We derive:
+\begin{itemize}
+    \item ECG $\Rightarrow$ HRV surrogates via R-peak detection (e.g., mean heart rate, RMSSD, SDNN).\\
+    \item EDA $\Rightarrow$ phasic features (e.g., phasic component, SCR count/mean amplitude).\\
+    \item ACC $\Rightarrow$ magnitude: \( m = \sqrt{x^2 + y^2 + z^2} \).
+\end{itemize}
+
+\subsection{Dataset Overview (WESAD)}
+WESAD (Wearable Stress and Affect Detection) is a multimodal dataset featuring physiological and motion data from 15 subjects recorded with both chest- and wrist-worn devices \cite{b6}. Available modalities include blood volume pulse (BVP), electrocardiogram (ECG), electrodermal activity (EDA/GSR), electromyogram (EMG), respiration (Resp), skin temperature (Temp), and tri-axial acceleration (ACC). The protocol covers multiple affective states, notably baseline/neutral, stress (e.g., arithmetic task), and amusement, with continuous annotations. Self-reports from validated questionnaires are also included. Prior benchmarks on WESAD report accuracies up to \(\sim\)80\% for three-class settings and up to \(\sim\)93\% for binary stress vs. non-stress classification. In this work, we focus on chest signals and tri-class labels (stress, amusement, meditation) consistent with the processing in our notebook and feature pipeline.
+
+\subsection{Windowing and Labeling}
+Signals are segmented into 30~s windows with 15~s stride (100~Hz \(\Rightarrow\) 3000 time steps/window). For tri-class modeling, we consider labels stress (1), amusement (2), and meditation (3), following the dataset annotation.
+
+\subsection{Feature Tensor}
+Per time step we stack up to five channels: [HRV\_MeanHR, HRV\_RMSSD, HRV\_SDNN, EDA\_Phasic (or SCR summary proxy), ACC\_Mag], yielding a tensor of shape (3000, 5) per window.
+
+\subsection{Normalization}
+Per-window features are standardized using statistics fit on a calibration subset of windows from the training split to avoid leakage. This provides subject- and session-robust scaling during training and inference.
+
+\subsection{Model Architecture}
+The final model is a compact temporal network implemented with Keras Sequential:
+\begin{itemize}
+    \item Conv1D(64, kernel=3, activation=ReLU)
+    \item Conv1D(64, kernel=3, activation=ReLU)
+    \item MaxPooling1D(pool=2)
+    \item LSTM(100)
+    \item Flatten
+    \item Dense(100, activation=ReLU)
+    \item Dense(3, activation=Softmax)
+\end{itemize}
+This hybrid 1D-CNN+LSTM captures short-range morphology and longer temporal dependencies while remaining small enough for on-device deployment (via TFLite/Core~ML conversion).
+
+\subsection{Training Configuration}
+We construct 30~s windows with 15~s stride from resampled signals, then stratify by class and split into 80\% training and 20\% test sets. The resulting tensors have shape (3000 time steps, 5 features). We train for 20 epochs with a batch size of 32 using Adam (default \(\alpha=10^{-3}\)) and categorical cross-entropy. Early stopping can be applied based on validation loss with a patience of 5 epochs to avoid overfitting. Learning-rate warmup/decay (optional cosine schedule) yields similar convergence. We standardize features using statistics computed only on the training split to prevent leakage. Labels are one-hot encoded for tri-class softmax.
+
+For robustness, we recommend a cross-subject evaluation design (e.g., LOSO) and per-subject re-scaling baselines for personalization. Data augmentation on time series (additive Gaussian noise, slight temporal warping) has negligible effect on this compact model and is therefore omitted in the reported results.
+
+\subsection{Evaluation Protocol}
+We evaluate per-window classification on the held-out set and report accuracy (primary). We recommend macro F1 to mitigate class imbalance effects across the tri-class labels (stress, amusement, meditation). To assess generalization, a Leave-One-Subject-Out (LOSO) protocol is encouraged in future studies; our current split follows the per-window stratified approach consistent with the implementation in the notebook. Training/validation curves (accuracy/loss) are monitored each epoch to ensure stable convergence; gradients remain well-behaved without clipping due to the shallow depth and pooling.
+
+\subsection{Reproducibility and Deployment}
+All preprocessing, feature construction, and model code is contained in the accompanying notebook for end-to-end reproducibility, including fixed random seeds where supported. The trained Keras model is saved to \texttt{.h5} and convertible to TFLite/Core~ML for edge deployment. On device, we mirror the exact resampling (700~Hz \(\rightarrow\) 100~Hz), windowing (30~s; 15~s stride), and scaling pipeline to ensure training-serving parity. The inference path exposes both the raw tri-class probabilities and the top-1 label with confidence; a smoothing filter (short moving average) can reduce flicker in the UI.
+
+\subsection{LLM Configuration}
+\textbf{Local (Edge) Guidance:} We use DeepSeek Distil with LLaMA 8B for low-latency, privacy-preserving inference. Prompts are compact and rely on recent stress state, current study goal, last few interactions, and a small retrieved snippet budget. Responses are constrained with explicit formatting (bullet steps, time-bounded exercises) and refusal rules for out-of-scope advice.
+
+\textbf{Cloud Reasoning:} For complex synthesis and longer study units, we use Gemini~2.5~Pro with a \(\sim\)200k token context window. This allows richer RAG payloads (multi-document passages, prior session summaries), syllabus alignment, and higher-fidelity explanations. Safety filters (self-harm, medical/clinical boundaries), content constraints, and retrieval citations are applied consistently. The system degrades gracefully to the local model on connectivity loss or when privacy policies require local-only processing.
+
+\section{Results and Analysis}
+\subsection{Output Screens / Reports}
+The web UI presents: (i) real-time stress indicators with confidence and trend, (ii) stress-adjusted study units tailored to the active topic, and (iii) guided relaxation prompts (e.g., timed breathing, brief mindfulness). The backend maintains retrieval traces (document IDs, scores) and LLM prompt/response summaries to support auditability and iterative prompt refinement. Example screens include a session timeline, content difficulty toggles, and break recommendations when sustained stress is detected.
+
+\subsection{Performance Evaluation}
+Using 30~s windows with 15~s stride and standardized features, the 1D-CNN+LSTM achieved high held-out performance. On the tri-class classification task (stress, amusement, meditation), the model attained \textbf{98.74\%} test accuracy. Confusion patterns show amusement and meditation are occasionally confused under low-motion segments; stress is most separable due to combined HRV/EDA signatures. The compact architecture sustains real-time throughput on-device with ample headroom for UI rendering and network I/O.
+
+\subsection{Comparison with Existing Methods}
+Our performance aligns with prior multimodal stress detection findings \cite{b1,b2}, while the system adds an integrated RAG+LLM layer to close the loop from sensing to adaptive educational content---a dimension often absent in baseline detection-only pipelines.
+
+\section{Evaluation Metrics and Discussion}
+\subsection{Quantitative Metrics}
+Primary: accuracy on the held-out set. Recommended: macro F1 (class balance), per-class precision/recall, and calibration error (ECE) for probabilistic outputs. For cross-subject generalization, LOSO is advised. Latency (end-to-end inference + RAG/LLM) and energy usage on device are key deployment metrics.
+
+\subsection{Qualitative Metrics for Guidance}
+For the LLM layer: safety checks (crisis intent, medical/clinical boundaries), content relevance to syllabus and user goal, clarity and actionability, and user-perceived helpfulness. Retrieval quality is monitored via top-$k$ recall/overlap and source diversity. We also track adherence to format constraints and rate-limit long responses during high-stress episodes.
+
+\section{Key Findings and Inferences}
+\begin{itemize}
+    \item \textbf{Multimodal features matter:} Fusing HRV surrogates (ECG), EDA phasic dynamics, and ACC magnitude---with baseline-aware normalization---outperforms unimodal pipelines and is resilient to transient artifacts.
+    \item \textbf{Edge-feasible accuracy:} A compact 1D-CNN+LSTM achieves \textbf{98.74\%} tri-class accuracy while sustaining real-time, on-device throughput, leaving headroom for UI and networking.
+    \item \textbf{Closed-loop guidance:} Coupling detection with LLM+RAG transforms raw stress estimates into actionable, syllabus-aligned study units and brief regulation prompts; retrieval grounding and safety filters are essential for reliability.
+    \item \textbf{Personalization is pivotal:} Light-weight calibration and planned domain adaptation (e.g., DANN) stabilize performance across users, sessions, and contexts without heavy labeling burden.
+\end{itemize}
+
+\section{Limitations and Future Enhancements}
+\subsection{Limitations}
+The current evaluation uses a per-window stratified split, which may overestimate cross-subject generalization compared to a Leave-One-Subject-Out protocol. The WESAD dataset, while comprehensive, was collected in controlled laboratory conditions with limited demographic diversity, which may not fully represent real-world variability in stress patterns, sensor placement, and environmental factors. Additionally, the qualitative assessment of LLM-generated guidance quality and its impact on learning outcomes requires rigorous, IRB-approved longitudinal user studies that are beyond the scope of this initial work.
+
+\subsection{Future Enhancements}
+Future work will implement LOSO cross-validation to better assess generalization, along with on-device calibration mechanisms that adapt to individual physiological baselines. We plan to integrate domain adaptation techniques (e.g., DANN) for improved personalization across users and sessions. Expanding the sensor suite to include sleep patterns, workload context, and environmental factors will enable richer stress profiling. Enhanced safety protocols, including clinician-in-the-loop escalation pathways for high-risk scenarios, are critical for real-world deployment. Additional research directions include ablation studies on feature importance, model architecture variants, and human-in-the-loop refinement of prompt engineering for educational effectiveness.
+
+\section{Conclusion}
+This paper presents the Adaptive Study Companion, an integrated system that addresses the critical challenge of detecting and responding to student distress in real time through a novel combination of multimodal wearable sensing, efficient on-device machine learning, and LLM-driven content adaptation. Our approach demonstrates three key contributions: (1) a compact 1D-CNN+LSTM architecture that achieves 98.74\% accuracy on tri-class stress classification while maintaining real-time inference capabilities suitable for mobile deployment; (2) a hybrid LLM configuration leveraging both edge and cloud models (DeepSeek Distil LLaMA 8B and Gemini 2.5 Pro) with RAG to generate context-aware, stress-adjusted study guidance; and (3) an end-to-end pipeline that closes the loop between physiological state detection and adaptive educational interventions.
+
+The system's high classification accuracy (98.74\%) validates the effectiveness of multimodal feature fusion (HRV, EDA phasic response, and accelerometer magnitude) within a temporal deep learning framework. The integration of LLM+RAG addresses a significant gap in prior work by providing not just stress detection, but actionable, personalized educational guidance that adapts to detected affective states. The hybrid architecture ensures both privacy-preserving local inference and sophisticated cloud-based reasoning when connectivity and context allow.
+
+While the current evaluation demonstrates strong performance on the WESAD dataset, real-world deployment will require addressing limitations around cross-subject generalization, demographic diversity, and longitudinal validation of learning outcomes. The framework provides a solid foundation for advancing personalized learning technologies that prioritize both cognitive performance and student well-being. As wearable sensors become increasingly ubiquitous and LLMs continue to improve in reasoning and safety, systems like the Adaptive Study Companion represent a promising direction for intelligent educational technology that is responsive to the holistic needs of learners.
+
+\section*{References}
+
+\begin{thebibliography}{00}
+\bibitem{b1} R. Walambe, P. Nayak, A. Bhardwaj, and K. Kotecha, ``Employing multimodal machine learning for stress detection,'' Journal of Healthcare Engineering, 2021.
+\bibitem{b2} M. Hosseini et al., ``Multimodal stress detection using facial landmarks and biometric signals,'' arXiv:2311.03606, 2023.
+\bibitem{b3} G. Xu, R. Qin, Z. Zheng, and Y. Shi, ``An Adaptive System for Wearable Devices to Detect Stress Using Physiological Signals,'' arXiv:2407.15252, 2024.
+\bibitem{b4} K. Choksi et al., ``SensEmo: Enabling Affective Learning through Real-time Emotion Recognition with Smartwatches,'' arXiv:2407.09911, 2024.
+\bibitem{b5} L. Yu et al., ``Multimodal Sensing-Enabled Large Language Models for Automated Emotional Regulation,'' Sensors, vol. 25, no. 15, 2025.
+\bibitem{b6} P. Schmidt, A. Reiss, R. Duerichen, C. Marberger, and K. Van Laerhoven, ``Introducing WESAD, a multimodal dataset for Wearable Stress and Affect Detection,'' ICMI, 2018.
+\end{thebibliography}
+
+\end{document}

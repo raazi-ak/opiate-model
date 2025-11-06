@@ -1,0 +1,8 @@
+INFO:     Will watch for changes in these directories: ['/Users/raazifaisal/Documents/Opiate-model/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [78689] using WatchFiles
+INFO:     Started server process [78754]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+/opt/homebrew/Cellar/python@3.12/3.12.11/Frameworks/Python.framework/Versions/3.12/lib/python3.12/multiprocessing/resource_tracker.py:279: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

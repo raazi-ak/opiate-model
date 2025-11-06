@@ -1,0 +1,36 @@
+flowchart LR
+  subgraph Wearables
+    AW[Apple Watch\nHR, HRV, EDA/GSR, BVP, Temp, Resp, ACC]
+  end
+
+  subgraph Mobile[Mobile (iOS)]
+    FE[Preprocess & Window]\nstyle FE fill:#eef
+    M1[1D-CNN (Cardio features)]
+    M2[1D-CNN (Motion features)]
+    FUS[Fusion + Classifier\n(stress / amusement / meditation)]
+    FE --> M1
+    FE --> M2
+    M1 --> FUS
+    M2 --> FUS
+  end
+
+  subgraph Backend[Backend API]
+    API[FastAPI/Flask]
+    RAG[Retriever (FAISS/Chroma)]
+    LLM[LLM + Orchestrator\n(Prompting + Safety)]
+    API --> RAG
+    RAG --> LLM
+  end
+
+  subgraph Frontend[Web Frontend]
+    UI[Adaptive Study UI\n(Study units, prompts, pacing)]
+  end
+
+  AW --> FE
+  FUS -- stress state + context --> API
+  LLM -- guidance + content --> UI
+  UI -- feedback & interactions --> API
+
+  classDef comp fill:#fff,stroke:#333,stroke-width:1px;
+  class AW,FE,M1,M2,FUS,API,RAG,LLM,UI comp;
+

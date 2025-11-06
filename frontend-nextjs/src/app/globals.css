@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --card: #ffffff;
+  --card-foreground: #171717;
+  --popover: #ffffff;
+  --popover-foreground: #171717;
+  --primary: #10b981; /* emerald */
+  --primary-foreground: #ffffff;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #171717;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --accent: #f4f4f5;
+  --accent-foreground: #171717;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #10b981;
+  --radius: 0.5rem;
+  --accent-2: #22d3ee; /* cyan */
+  --neon: #67e8f9; /* neon cyan */
+  --neon-pink: #f472b6; /* neon pink */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Support BOTH system dark and manual .dark toggle */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+    --card: #0f1115;
+    --card-foreground: #ededed;
+    --popover: #0f1115;
+    --popover-foreground: #ededed;
+    --primary: #34d399;
+    --primary-foreground: #0a0a0a;
+    --secondary: #1f1f23;
+    --secondary-foreground: #ededed;
+    --muted: #111317;
+    --muted-foreground: #a1a1aa;
+    --accent: #1f1f23;
+    --accent-foreground: #ededed;
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    --border: #27272a;
+    --input: #27272a;
+    --ring: #34d399;
+    --accent-2: #22d3ee;
+  }
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --card: #0f1115;
+  --card-foreground: #ededed;
+  --popover: #0f1115;
+  --popover-foreground: #ededed;
+  --primary: #34d399;
+  --primary-foreground: #0a0a0a;
+  --secondary: #1f1f23;
+  --secondary-foreground: #ededed;
+  --muted: #111317;
+  --muted-foreground: #a1a1aa;
+  --accent: #1f1f23;
+  --accent-foreground: #ededed;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #34d399;
+  --accent-2: #22d3ee;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Markdown prose styles */
+.prose {
+  color: inherit;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  color: inherit;
+}
+
+.prose code {
+  background-color: var(--muted);
+  color: inherit;
+}
+
+.prose pre {
+  background-color: var(--muted);
+  color: inherit;
+}
+
+.prose blockquote {
+  border-left-color: var(--primary);
+  color: var(--muted-foreground);
+}
+
+.prose table {
+  border-color: var(--border);
+}
+
+.prose th, .prose td {
+  border-color: var(--border);
+}
+
+.prose a {
+  color: var(--primary);
+}
+
+.prose a:hover {
+  text-decoration: underline;
+}
+
+/* Neon helpers */
+.neon-text {
+  text-shadow: 0 0 6px var(--neon), 0 0 12px var(--neon);
+}
+.neon-ring {
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 0 24px rgba(103, 232, 249, 0.35);
+}
+.shadow-soft {
+  box-shadow: 0 6px 24px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+}
+.glass {
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(8px);
+}
+.dark .glass {
+  background: rgba(20,22,28,0.55);
+}

@@ -1,0 +1,353 @@
+WESAD (Wearable Stress and Affect Detection)
+Multimodal Dataset for Emotion & Stress Detection via Wearable Sensors
+
+WESAD (Wearable Stress and Affect Detection)
+
+22
+
+Code
+
+Download
+more_vert
+About Dataset
+Description
+
+Affect recognition aims to detect a person's affective state based on observables, with the goal to e.g. improve human-computer interaction. Long-term stress is known to have severe implications on wellbeing, which call for continuous and automated stress monitoring systems. However, the affective computing community lacks commonly used standard datasets for wearable stress detection which a) provide multimodal high-quality data, and b) include multiple affective states. Therefore, we introduce WESAD, a new publicly available dataset for wearable stress and affect detection. This multimodal dataset features physiological and motion data, recorded from both a wrist- and a chest-worn device, of 15 subjects during a lab study. The following sensor modalities are included: blood volume pulse, electrocardiogram, electrodermal activity, electromyogram, respiration, body temperature, and three-axis acceleration. Moreover, the dataset bridges the gap between previous lab studies on stress and emotions, by containing three different affective states (neutral, stress, amusement). In addition, self-reports of the subjects, which were obtained using several established questionnaires, are contained in the dataset. Furthermore, a benchmark is created on the dataset, using well-known features and standard machine learning methods. Considering the three-class classification problem (baseline vs. stress vs. amusement), we achieved classification accuracies of up to 80%. In the binary case (stress vs. non-stress), accuracies of up to 93% were reached. Finally, we provide a detailed analysis and comparison of the two device locations (chest vs. wrist) as well as the different sensor modalities.
+
+Citation
+
+Philip Schmidt, Attila Reiss, Robert Duerichen, Claus Marberger and Kristof Van Laerhoven, "Introducing WESAD, a multimodal dataset for Wearable Stress and Affect Detection", ICMI 2018, Boulder, USA, 2018.
+
+Disclaimer
+
+You may use this data for scientific, non-commercial purposes, provided that you give credit to the owners when publishing any work based on this data.
+
+
+
+
+Adaptive Study Companion (Distress Map with LLM Guidance)
+4. Objectives
+•	To detect stress in real time using multimodal physiological and motion data collected from wearable sensors (Heart Rate, HRV, Blood Pressure, and Accelerometer).
+•	To deploy a lightweight, efficient deep learning model (dual 1D-CNN architecture) for on-device stress inference, ensuring privacy and low latency.
+•	To dynamically personalize study content and guidance based on the detected stress level through LLM-driven reasoning and Retrieval-Augmented Generation (RAG).
+•	To provide actionable feedback such as relaxation prompts, content pacing adjustments, and adaptive scheduling to enhance learning efficiency.
+•	To integrate continuous feedback loops between physiological state, cognitive load, and educational outcomes for long-term adaptive learning optimization.
+6. Proposed System
+Architecture Overview
+The system follows a hybrid on-device and cloud-integrated pipeline:
+
+1. Data Acquisition Layer:
+   Physiological and motion data are captured via the Apple Watch (Heart Rate, HRV, Blood Pressure, and Accelerometer).
+
+2. On-Device ML Inference:
+   A dual 1D-CNN model runs locally on the iPhone. CNN-1 processes cardiovascular features (HR, HRV, BP), while CNN-2 processes motion signals (ACC-derived stress indicators). The outputs are fused to predict a real-time stress score (low, moderate, or high).
+
+3. Cloud Processing & RAG Layer:
+   The stress score, along with recent study activity, is sent to a web backend that hosts an LLM-based reasoning engine enhanced with a Retrieval-Augmented Generation (RAG) pipeline. The RAG retrieves material from the uploaded academic corpus, and the LLM reformats it into simplified, stress-adjusted 'study octets' optimized for cognitive load.
+
+4. Frontend & Adaptive Feedback Loop:
+   The web frontend displays tailored study modules, relaxation guidance, and pacing cues. Student feedback and recovery patterns are fed back into the personalization pipeline for continual tuning.
+7. Implementation Details
+Tools and Technologies Used
+Component	Technology / Framework	Purpose
+Wearable Device	Apple Watch (watchOS SDK, HealthKit)	Collect physiological and motion data
+Mobile Interface	iOS (Swift)	On-device inference and data transmission
+ML Framework	TensorFlow Lite / Core ML	Run dual 1D-CNN stress detection model locally
+Backend / API	FastAPI / Flask	Receive stress levels and trigger LLM module
+LLM Engine	OpenAI API / Llama 3 / fine-tuned Mistral	Generate personalized learning and relaxation content
+RAG Layer	FAISS / Chroma + Document Store	Retrieve relevant academic content
+Frontend Web UI	React.js / Next.js	Display study octets, progress tracking, and guidance
+Database	PostgreSQL	Store user data, history, and material metadata
+Deployment	AWS / Azure Cloud	Host the backend and retrieval system
+Modules Description
+1.	Sensor & Data Acquisition Module: Reads HR, HRV, BP, and ACC data through the Apple HealthKit API and synchronizes between watch and phone.
+2.	Stress Detection Module: Dual 1D-CNN model for multimodal fusion; generates stress index with continuous calibration based on prior readings.
+3.	Backend Communication Module: Secure transmission of anonymized stress-level data to the web service via REST APIs.
+4.	RAG + LLM Module: Uses detected stress level and academic context to retrieve relevant material and generate adaptive study content.
+5.	Adaptive Study Frontend Module: Displays study octets, provides visual stress indicators, and recommends breaks or relaxation content.
+6.	Personalization Engine: Continuously adjusts retrieval parameters and LLM prompts using historical stress-response data.
+
+
+
+Anirudh R.
+22MIA1094
+Himani S Kumar
+22MIA1092
+Raazi Faisal Mohiddin
+22MIA1103
+Adaptive Study Companion (Distress Mapping with
+LLM Guidance)
+This report outlines the "Adaptive Study Companion
+(Distress Map with LLM Guidance)," an Intelligent
+Adaptive Study System designed to detect student distress
+using real-time physiological and emotional data. A Large
+Language Model (LLM) will then dynamically generate
+personalized study technique suggestions, recommend
+breaks, and provide guided relaxation exercises to
+optimize learning. The report reviews state-of-the-art
+multimodal stress detection and the transformative
+potential of LLMs in personalized educational guidance.
+Key research challenges, including prompt engineering,
+safety, reliability, personalization, and the evaluation of
+LLM-generated advice, are critically examined. The
+methodology details data acquisition from wearable
+sensors and cameras, the architecture of distress detection
+models, and robust LLM integration strategies to ensure
+effective, safe, and personalized interventions.
+I. INTRODUCTION
+Mental stress is a pervasive public health concern,
+significantly impacting individual well-being and academic
+performance. Prolonged or severe stress can disrupt normal
+life, degrade performance, and lead to adverse health outcomes
+such as cardiac arrhythmias, depression, and anxiety.1
+Traditional stress assessment methods, such as self-reports, are
+limited by their subjectivity, infrequency, and inability to
+capture the dynamic, real-time fluctuations of stress, which can
+manifest uniquely across individuals.1 To effectively address
+this, objective, continuous, and adaptive monitoring is
+essential.
+Emotional engagement is critical for effective learning.
+Students often struggle with motivation and concentration,
+particularly in online environments where real-time emotional
+feedback is limited. Timely detection of student distress is
+paramount for early intervention, protecting vulnerable
+students from long-term detrimental effects.1 The Adaptive
+Study Companion aims to bridge this feedback gap by
+providing real-time emotional insights, enabling dynamic
+adjustments to educational content and pacing, thereby
+improving learning outcomes and enhancing student well-
+being.
+II. LITERATURE REVIEW
+personalized intervention. Recent research highlights the
+efficacy of combining various data streams and the potential
+of generative AI in this domain. This section reviews four key
+papers that inform the foundation of this project.
+The development of intelligent adaptive study systems
+relies on advancements in multimodal distress detection and
+the application of Large Language Models (LLMs) for
+A. Reviewed Papers
+1. Hosseini et al. (2023): Multimodal Stress Detection
+Using Facial Landmarks and Biometric Signals
+This paper proposes a novel multimodal learning
+approach for stress detection by integrating facial
+landmarks and biometric signals, including Heart Rate
+(HR) and Electrodermal Activity (EDA).1 The study
+utilized the EmpathicSchool dataset and investigated
+various early-fusion and late-fusion techniques.1 Their
+findings demonstrated that early-fusion, particularly
+with a 1D-CNN model, achieved a high accuracy of
+98.38%, outperforming multivariate unimodal or late-
+fusion approaches.1 The research emphasizes that
+combining diverse data sources provides a more
+comprehensive understanding of stress, addressing the
+limitations of single-modality detection.1
+2. Choksi et al. (2024): SensEmo: Enabling Affective
+Learning through Real-time Emotion Recognition with
+Smartwatches
+Choksi et al. introduced SensEmo, a smartwatch-based
+system designed for affective learning that leverages
+physiological signals like Heart Rate (HR) and
+Galvanic Skin Response (GSR) to recognize student
+motivation and concentration in real-time.1 The
+system employs a personalized emotion recognition
+model that predicts emotional states based on valence
+and arousal, and a reinforcement learning-based
+controller to suggest adjustments to teaching content
+and pacing.1 Evaluation results showed that SensEmo
+achieved an average emotion recognition accuracy of
+88.9% and significantly improved online learning
+outcomes, with students scoring 40.0% higher on
+quizzes.1 The study highlights the crucial role of
+personalized calibration for system robustness and
+accuracy.1
+3. Yu et al. (2025): Multimodal Sensing-Enabled Large
+Language Models for Automated Emotional
+Regulation: A Review of Current Technologies,
+Opportunities, and Challenges
+This comprehensive review by Yu et al. systematically
+examines the convergence of multimodal sensing
+4. technologies and Large Language Models (LLMs) for
+Automated Emotional Regulation (AER) systems. The
+paper highlights LLMs' advanced capabilities in
+processing, understanding, and generating human-like
+language, enabling fluent, context-aware, and
+empathetic conversations, and their potential for
+personalization and integration of external knowledge
+via Retrieval-Augmented Generation (RAG). It also
+critically discusses challenges such as the lack of true
+empathy, clinical safety concerns (e.g., hallucinations),
+underdeveloped crisis detection, and bias mitigation in
+LLM-driven therapeutic contexts. The review proposes
+a unified AER framework comprising modules for
+contextual multimodal profiling, emotion recognition,
+emotion regulation, and emotion expression.
+Xu et al. (2024): An Adaptive System for Wearable
+Devices to Detect Stress Using Physiological Signals
+Xu et al. proposed an adaptive framework for
+personalized stress detection using
+Photoplethysmography (PPG) and Electrodermal
+Activity (EDA) signals from wearable devices. This
+framework aims to overcome the limitations of
+traditional generalized models, which often suffer
+performance drops on new users due to domain shifts,
+by providing each user with a personalized model for
+higher accuracy. The methodology involves three
+stages: developing a generalized model offline (using a
+1D-CNN backbone), adapting it to the user's unlabeled
+data (via unsupervised Domain Adversarial Training of
+Neural Networks - DANN), and fine-tuning it with a
+small set of labeled data obtained through user
+interaction. The paper emphasizes the potential for
+broader mental health applications beyond stress
+detection.
+III. PREPARE YOUR PAPER BEFORE STYLING
+A. Research Gaps and Motivations
+Despite advancements, traditional machine learning
+models often exhibit diminished performance in real-world
+scenarios due to limited diverse training data,
+discrepancies between lab and real-world environments
+(domain shift), and challenges in achieving effective
+personalization.1 Unimodal systems inherently struggle to
+generalize due to susceptibility to contextual variations,
+signal degradation, and ambiguous mapping between a
+single signal and complex affective states.1 This
+generalization gap between controlled settings and
+practical deployment necessitates adaptive and
+personalized solutions.
+B. Project Challenges and Open Questions
+The Adaptive Study Companion, while leveraging cutting-
+edge technologies, faces several challenges:
+1. Prompt Engineering for Contextual Relevance: LLMs
+require meticulous prompting to generate appropriate,
+contextually relevant, and therapeutically sound
+2. 3. 4. responses. Translating complex physiological and
+emotional states into structured, actionable prompts is
+crucial to avoid generic or unhelpful advice.1 This is a
+medium-high difficulty task.
+Ensuring Safety and Reliability of LLM Guidance: A
+significant concern is the LLM's propensity for
+"hallucinations"-generating plausible but clinically
+inappropriate or harmful advice.1 Developing robust
+crisis detection and escalation protocols, along with
+bias mitigation strategies, is paramount to ensure user
+safety and prevent the perpetuation of biases from
+training data.1 This is a medium-high difficulty task.
+Personalization Across Diverse Student Profiles:
+Emotion recognition using physiological signals
+exhibits significant inter-subject variability,
+necessitating personalized calibration for accurate
+interpretation [1, 1]. Efficient, low-burden
+personalization techniques are required to adapt the
+system to individual students without extensive manual
+setup.1 This is a medium difficulty task.
+Evaluation Metrics for LLM-Generated Advice:
+Beyond traditional accuracy metrics for detection,
+evaluating the quality and impact of LLM-generated
+therapeutic advice presents a complex challenge. New,
+clinically relevant metrics are needed to assess
+therapeutic utility, safety, perceived empathy, and
+actual impact on user well-being, moving beyond mere
+linguistic fluency.1 This is a significant research
+challenge.
+IV. METHODOLOGY
+The Adaptive Study Companion integrates multimodal sensing
+with advanced LLM capabilities to create a closed-loop
+system for real-time distress detection and adaptive
+intervention.
+1) A. Data Acquisition and Preprocessing
+Physiological data will be collected from wearable devices,
+including Heart Rate (HR), Heart Rate Variability (HRV),
+Electrodermal Activity (EDA)/Galvanic Skin Response
+(GSR), Blood Volume Pulse (BVP), Skin Temperature
+(TEMP), Respiration (RESP), Electromyogram (EMG), and
+Accelerometer (ACC) data.1 Facial emotion recognition data,
+such as facial landmarks and expressions, will be acquired
+from camera sensors.1 Raw signals will undergo preprocessing
+steps including denoising, segmentation into consistent
+windows, and comprehensive feature extraction (e.g.,
+statistical, time-domain, and frequency-domain features) to
+ensure data quality and extract meaningful insights.1
+2) B. Distress Detection Models
+The core of the distress detection system will utilize
+sophisticated multimodal deep learning architectures, such as
+Convolutional Neural Networks (CNNs) for time-series and
+spatial data, and Recurrent Neural Networks (RNNs) or Long
+Short-Term Memory (LSTM) networks for sequential data.1
+Early Fusion (feature-level concatenation) will be the primary
+fusion strategy due to its superior performance in multimodal
+stress detection.1 To address inter-subject variability, adaptive
+frameworks like Domain Adversarial Training of Neural
+Networks (DANN) will be incorporated to personalize models
+for individual users over time, enhancing real-world
+applicability.1 Model performance will be rigorously evaluated
+using Leave-One-Subject-Out (LOSO) cross-validation and
+the F1-score to ensure generalizability.1
+3) C. LLM Integration Strategies for Adaptive Guidance
+LLMs will serve as the intelligent core, interpreting the
+multimodally sensed emotional states and generating adaptive
+regulatory responses. Advanced prompt engineering
+techniques will be employed to guide LLMs. This involves
+translating the "distress map"-a comprehensive affective state
+vector derived from multimodal data-into contextually rich
+and therapeutically relevant prompts. The goal is to ensure the
+LLM provides specific, actionable, and appropriate advice,
+moving beyond generic responses.1 Retrieval-Augmented
+Generation (RAG) will be integrated to enhance the accuracy,
+reliability, and evidence-based nature of the guidance. This
+allows the LLM to access and synthesize information from an
+external, vetted knowledge base of therapeutic scripts (e.g.,
+from CBT, DBT, mindfulness practices).1 The LLM will
+operate within a reinforcement learning-based control loop,
+enabling it to adapt teaching content and pacing based on real-
+time emotional feedback and student preferences.1 Robust
+safety mechanisms, including real-time detection of high-risk
+intent (e.g., self-harm ideation), automatic redirection to
+human support channels, and fail-safe redundancy
+mechanisms that override automated responses when
+necessary, will be paramount.1 Bias mitigation strategies will
+also be integrated throughout the LLM pipeline to prevent
+unequal treatment or misinterpretation.1 Continuous
+personalization will ensure its guidance remains highly
+personalized and relevant to the individual student's changing
+needs.
+V. CONCLUSION
+This report outlines the design and rationale for the
+"Adaptive Study Companion (Distress Map with LLM
+Guidance)," an intelligent system aimed at addressing student
+distress and enhancing learning. By integrating multimodal
+physiological and facial emotion recognition, the system
+achieves high accuracy in real-time distress detection. The
+core innovation lies in leveraging Large Language Models to
+provide personalized, context-aware, and therapeutically
+grounded guidance, including study technique suggestions,
+break recommendations, and guided relaxation exercises. The
+comprehensive literature review underscores the superior
+performance of multimodal fusion techniques and the
+transformative potential of LLMs in educational support.
+While significant challenges remain in prompt engineering,
+ensuring safety and reliability, achieving robust
+personalization, and developing appropriate evaluation metrics
+for LLM-generated advice, this framework provides a clear
+path forward for developing a truly adaptive and empathetic
+learning companion.
+REFERENCES
+1. Walambe, R., Nayak, P., Bhardwaj, A., & Kotecha, K. (2021).
+Employing multimodal machine learning for stress detection.
+Journal of Healthcare Engineering, 1-12.
+2. Hosseini, M., Bodaghi, M., Bhupatiraju, R. T., Maida, A., &
+Gottumukkala, R. (2023). Multimodal stress detection using facial
+landmarks and biometric signals.arXiv preprint arXiv:2311.03606v1.
+3. Xu, G., Qin, R., Zheng, Z., & Shi, Y. (2024). An Adaptive System for
+Wearable Devices to Detect Stress Using Physiological Signals. arXiv
+preprint arXiv:2407.15252v1.
+4. Choksi, K., Chen, H., Joshi, K., Jade, S., Nirjon, S., & Lin, S. (2024).
+SensEmo: Enabling Affective Learning through Real-time Emotion
+Recognition with Smartwatches.
+arXiv preprint arXiv:2407.09911v1.
+5. Yu, L., Ge, Y., Ansari, S., Imran, M., & Ahmad, W. (2025). Multimodal
+Sensing-Enabled Large Language Models for Automated Emotional
+Regulation: A Review of Current Technologies, Opportunities, and
+Challenges.
+Sensors, 25(15), 4763.
+
+

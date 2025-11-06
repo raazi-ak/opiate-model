@@ -1,0 +1,17 @@
+sequenceDiagram
+  participant W as Wearable Sensors
+  participant M as Mobile (On-Device Inference)
+  participant B as Backend (API + RAG + LLM)
+  participant F as Frontend (Web UI)
+
+  W->>M: HR, HRV, EDA, ACC (stream)
+  M->>M: Preprocess (denoise, resample, window)
+  M->>M: Extract features (HRV, EDA phasic, ACC mag)
+  M->>M: Dual 1D-CNN + Fusion => Stress State
+  M->>B: {stress_state, recent_context}
+  B->>B: Retrieve docs (FAISS/Chroma)
+  B->>B: LLM prompt w/ safety + formatting
+  B-->>F: Study units + relaxation prompts
+  F-->>M: User feedback (engagement, outcomes)
+  M-->>B: Telemetry for personalization
+
