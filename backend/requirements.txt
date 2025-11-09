@@ -69,7 +69,8 @@ uvloop==0.21.0
 watchfiles==1.1.0
 
 # Protocol buffers and gRPC
-protobuf==4.25.8
+# protobuf 4.25.8 is compatible with Google Cloud packages (requires <5.0.0dev, >=3.19.5)
+protobuf>=4.21.6,<5.0.0
 grpcio==1.75.1
 grpcio-status==1.62.3
 grpc-google-iam-v1==0.14.3
@@ -92,18 +93,6 @@ orjson==3.11.3
 msgpack==1.1.2
 PyYAML==6.0.3
 flatbuffers==25.9.23
-
-# Monitoring and observability
-opentelemetry-api==1.37.0
-opentelemetry-sdk==1.37.0
-opentelemetry-instrumentation==0.58b0
-opentelemetry-instrumentation-fastapi==0.58b0
-opentelemetry-instrumentation-asgi==0.58b0
-opentelemetry-exporter-otlp-proto-grpc==1.37.0
-opentelemetry-exporter-otlp-proto-common==1.37.0
-opentelemetry-proto==1.37.0
-opentelemetry-semantic-conventions==0.58b0
-opentelemetry-util-http==0.58b0
 
 # Other dependencies
 annotated-types==0.7.0
